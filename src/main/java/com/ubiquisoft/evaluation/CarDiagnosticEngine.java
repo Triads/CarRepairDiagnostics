@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
+import java.util.Map;
 
 public class CarDiagnosticEngine {
 
@@ -38,7 +39,45 @@ public class CarDiagnosticEngine {
 		 * Treat the console as information being read by a user of this application. Attempts should be made to ensure
 		 * console output is as least as informative as the provided methods.
 		 */
+		Boolean failEarly = false;
 
+		//Step 1
+		String make = car.getMake();
+		String model = car.getModel();
+		String year = car.getYear();
+		if(make == null || make.isEmpty()){
+			System.out.println("This car does not have a make.");
+			failEarly = true;
+		}
+		if(model == null || model.isEmpty()){
+			System.out.println("This car does not have a model.");
+			failEarly = true;
+		}
+		if(year == null || year.isEmpty()){
+			System.out.println("This car does not have a year.");
+			failEarly = true;
+		}
+		if (failEarly) return;
+
+		//Step two
+		Map<PartType, Integer> mpMap = car.getMissingPartsMap();
+		for(Map.Entry<PartType, Integer> entry : mpMap.entrySet()){
+			printMissingPart(entry.getKey(), entry.getValue());
+			failEarly = true;
+		}
+		if (failEarly) return;
+
+		//Step three
+		for (Part p: car.getParts() ) {
+			if(!p.isInWorkingCondition()){
+				printDamagedPart(p.getType(),p.getCondition());
+				failEarly = true;
+			}
+		}
+		if (failEarly) return;
+
+		//Step four
+		System.out.println("Diagnostics have been run successfully, the car is good to go.");
 
 	}
 
